@@ -17,9 +17,13 @@ const Login = (props, navigation) => {
                 :
                 <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }} >
                     <TouchableOpacity
-                        style={{ alignSelf: 'center', marginBottom: 20, padding: 15, width: '80%', backgroundColor: 'red' }}
+                        style={{
+                            alignSelf: 'center', marginBottom: 20, padding: 15, width: '80%', backgroundColor: 'red', borderRadius: 10,
+                            alignItems: 'center', justifyContent: 'center'
+                        }}
                         onPress={handleLogin}
                     >
+                        <Text>Next </Text>
                     </TouchableOpacity>
                 </View>
             }

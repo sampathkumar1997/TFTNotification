@@ -3,25 +3,64 @@ import LoginScreen from '../src/screens/LoginScreen'
 import MainStack from '../src/navigators/MainStack'
 import { NavigationContainer } from '@react-navigation/native';
 import messaging from '@react-native-firebase/messaging';
-import { Alert } from 'react-native';
+import { Alert, ToastAndroid } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import PushNotification from 'react-native-push-notification'
 
 const App = () => {
 
-  const [loggedIn, setLoggedIn] = useState('')
-  const [fcmToken, setFcmToken]= useState('')
+  const [loggedIn, setLoggedIn] = useState(false)
+  const [fcmToken, setFcmToken] = useState('')
 
   useEffect(() => {
     const unsubscribe = messaging().onMessage(async (remoteMessage) => {
       //When a notification arrives when app is in foreground state
-      Alert.alert('A new FCM message arrived!', JSON.stringify(remoteMessage.notification.body));
+      // Alert.alert('A new FCM message arrived!', JSON.stringify(remoteMessage));
+      console.log(remoteMessage)
+      // ToastAndroid.show(JSON.stringify(remoteMessage), ToastAndroid.SHORT);
+      PushNotification.createChannel({
+        channelId: "mychannel", // (required)
+        channelName: "My channel", // (required)
+        vibrate: true,
+      }, (created) => {
+        PushNotification.localNotification({
+          channelId: "mychannel",
+          autoCancel: true,
+          bigText: remoteMessage.notification.body,
+          subText: 'Notification',
+          title: `${remoteMessage.notification.title}`,
+          message: `${remoteMessage.notification.body}`,
+          vibrate: true,
+          vibration: 300,
+          playSound: true,
+          soundName: 'default',
+          ignoreInForeground: false,
+          importance: 'high',
+          invokeApp: true,
+          allowWhileIdle: true,
+          priority: 'high',
+          visibility: 'public'
+        })
+      })      
+      // setLoggedIn(true)
     }
     );
 
     /////If Notification comes when app is in background state
     messaging().setBackgroundMessageHandler(async remoteMessage => {
       console.log('Message handled in the background!', remoteMessage);
+      setLoggedIn(true)    
+
     });
+
+    messaging().onNotificationOpenedApp(remoteMessage => {
+      console.log(
+        'Notification caused app to open from background state:',
+        remoteMessage.notification,
+      );
+      setLoggedIn(true)
+    });
+
     requestUserPermission()
     return () => {
       unsubscribe();
