@@ -6,8 +6,8 @@ import messaging from '@react-native-firebase/messaging';
 import { Alert, ToastAndroid } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import PushNotification from 'react-native-push-notification'
-
-const App = () => {
+import BottomTabNavigator from './navigators/BottomTabNavigator';
+const App = ({ navigation }) => {
 
   const [loggedIn, setLoggedIn] = useState(false)
   const [fcmToken, setFcmToken] = useState('')
@@ -16,7 +16,6 @@ const App = () => {
     const unsubscribe = messaging().onMessage(async (remoteMessage) => {
       //When a notification arrives when app is in foreground state
       // Alert.alert('A new FCM message arrived!', JSON.stringify(remoteMessage));
-      console.log(remoteMessage)
       // ToastAndroid.show(JSON.stringify(remoteMessage), ToastAndroid.SHORT);
       PushNotification.createChannel({
         channelId: "mychannel", // (required)
@@ -41,15 +40,16 @@ const App = () => {
           priority: 'high',
           visibility: 'public'
         })
-      })      
-      // setLoggedIn(true)
+      })
+      remoteMessage?.data?.navigation && AsyncStorage.setItem("notificationNavigation", remoteMessage.data.navigation);
+      setLoggedIn(true)
     }
     );
 
     /////If Notification comes when app is in background state
     messaging().setBackgroundMessageHandler(async remoteMessage => {
       console.log('Message handled in the background!', remoteMessage);
-      setLoggedIn(true)    
+      setLoggedIn(true)
 
     });
 
@@ -58,6 +58,7 @@ const App = () => {
         'Notification caused app to open from background state:',
         remoteMessage.notification,
       );
+      remoteMessage?.data?.navigation && AsyncStorage.setItem("notificationNavigation", remoteMessage.data.navigation);
       setLoggedIn(true)
     });
 
@@ -95,7 +96,7 @@ const App = () => {
       <>
         {
           loggedIn ?
-            <MainStack />
+            <BottomTabNavigator to={'tab2'}  />
             :
             <LoginScreen />
         }

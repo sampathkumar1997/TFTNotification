@@ -5,8 +5,10 @@ import BottomTabNavigator from './BottomTabNavigator';
 const Stack = createStackNavigator();
 
 class MainStack extends Component {
-    state = {}
+
     render() {
+        console.log(this.props)
+
         return (
             <Stack.Navigator screenOptions={{ animationEnabled: false, headerShown: false }}>
                 <Stack.Screen name="Home" component={BottomTabNavigator} />                  
